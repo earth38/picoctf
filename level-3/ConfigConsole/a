@@ -1,0 +1,11 @@
+e "%x %x %x %x"
+e %4$x
+e aaaa %4$x
+e aaaa %1$x
+e aaaa %2$x
+e aaaa %3$x
+e aaaa %4$x
+e aaaa %5$x
+e aaaa %6$x
+e %x %x %x %x %x %x %x %x
+e "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"%12x

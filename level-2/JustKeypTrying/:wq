@@ -1,0 +1,7 @@
+with open("data") as f:
+    lines = f.read()
+    lines.split("\n")
+    lines = lines[-1]
+
+for i in range(len(lines)):
+    

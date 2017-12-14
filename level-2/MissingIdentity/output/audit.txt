@@ -1,0 +1,23 @@
+Foremost version 1.5.7 by Jesse Kornblum, Kris Kendall, and Nick Mikus
+Audit File
+
+Foremost started at Wed Nov 22 23:31:20 2017
+Invocation: foremost file 
+Output directory: /Users/miyatadaichi/ctf/picoctf/level-2/MissingIdentity/output
+Configuration file: /usr/local/etc/foremost.conf
+------------------------------------------------------------------
+File: file
+Start: Wed Nov 22 23:31:20 2017
+Length: Unknown
+ 
+Num	 Name (bs=512)	       Size	 File Offset	 Comment 
+
+0:	00000074.zip 	     402 KB 	      38342 	 
+Finish: Wed Nov 22 23:31:20 2017
+
+1 FILES EXTRACTED
+	
+zip:= 1
+------------------------------------------------------------------
+
+Foremost finished at Wed Nov 22 23:31:20 2017
