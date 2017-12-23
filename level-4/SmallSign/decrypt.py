@@ -1,3 +1,4 @@
+# picoctfのサーバにsshでログインしてから実行しないと成功しない
 from pwn import *
 from get600Primes import * 
 
