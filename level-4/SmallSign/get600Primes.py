@@ -25,5 +25,3 @@ def get600primes():
          if count == 600:
            return primes
 
-a = get600primes()
-print a

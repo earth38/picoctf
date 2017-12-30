@@ -1,90 +1,107 @@
-# picoctfのサーバにsshでログインしてから実行しないと成功しない
 from pwn import *
-from get600Primes import * 
+import time
+import re
 
-lstPrime = get600primes()
-#lstPrime = ['''<list of first 600 primes here>''']
+def is_prime(x):
+    if x < 2: return False 
+    if x == 2 or x == 3 or x == 5: return True 
+    if x % 2 == 0 or x % 3 == 0 or x % 5 == 0: return False 
 
-test_data = 130
+    prime = 7
+    step = 4
+    while prime <= math.sqrt(x):
+        if x % prime == 0: return False
 
-while (True):
-    host, port = "shell2017.picoctf.com", 27525
-    r = remote(host, port)
+        prime += step
+        step = 6 - step
 
-    rule = re.compile('[0-9]')
-    data = r.readuntil("(-1 to stop):")
-    data = rule.findall(data)
-    data = "".join(data)
-    data = data[2:-6]
+    return True
 
-    n = int(data)
-    lstSign = []
-
+def get400primes():
     count = 0
+    primes = []
+    for i in range(10000):
+       if is_prime(i) == True:  
+         primes.append(i)
+         count = count + 1
+         if count == 400:
+           return primes
 
-    print "start collecting data"
+def getSigndata(r,primes):
 
     try:
-        while count<=test_data:
+        #startTime = time.time()
+        data =  r.recvuntil("(-1 to stop):")
+       
+        #get N and e
+        n = data[1][3:]
+        data = data.split("\n")
+        signs = []
 
-                r.writeline(str(lstPrime[count]))
-                #print str(lstPrime[count])
-    
-                data = r.readuntil("(-1 to stop):")
-
-                #print data
-
-                chal = rule.findall(data)[:-1]
-                chal = "".join(chal)
-                chal = int(chal)
-
-                lstSign.append(chal)
-                count += 1
-                #print count
+        for i,prime in enumerate(primes):
+            r.sendline(str(prime))
+            signs.append(r.recvline()[12:].strip())
+            r.recvuntil("(-1 to stop):")
+            if i == 390:
+                r.sendline("-1")
+                return signs
     except:
-        print "query out of time"
-        test_data -= 10
-        print "try smaller test data", test_data
-        continue
+        print "cannot get signatrue..."
+        return []
 
-    print "finish colelcting data"
-    r.writeline("-1")
 
-    data = r.readuntil("challenge:")
-    print data
+def tryChallenge(r, primes, signs):
+    try:
+        data =  r.recvline()
+        m = re.search(r"[0-9]+$", data)
+        sign = int(m.group())
 
-    chal = rule.findall(data)
-    chal = "".join(chal)
-    chal = int(chal)
-    print "challenge:", chal
+        factors = prime_decomposition(sign)
+        answer = 1
+        print factors    
+        for factor in factors:
+            if factor > 2687:
+                print "bad..."
+                return False
 
-    i = 0
-    s = 1
-    found = True
-    print ""
-    while (chal<>1):
+            #print signs
+            answer = answer * int(signs[primes.index(factor)])
 
-        if i>=count:
-            print "not found"
-            found = False
-            break
+        r.sendline(str(answer))
+        print r.recvall()
+        return True
+    except:
+        print "challenge is failure"
+        return False
 
-        if (chal % lstPrime[i] == 0):
-            s = s * lstSign[i]
-            chal = chal/lstPrime[i]
-            print lstPrime[i], lstSign[i]
-        else:
-            i += 1
+def prime_decomposition(n):
+  i = 2
+  table = []
+  while i * i <= n:
+    while n % i == 0:
+      n /= i
+      table.append(i)
+    i += 1
+  if n > 1:
+    table.append(n)
+  return table
+
+
+
+if __name__ == '__main__':
+    while True:
+        # connect to the Server
+        primes = get400primes()
+        host, port = 'shell2017.picoctf.com', '27525'
+        r = remote(host, port)
+      
+         # get Signature data per prime
+        signs = getSigndata(r, primes)
+        
+        if not signs:
             continue
 
-    if (not found):
-        r.close()
-        print "Cannot find sign of divisor, try again ..."
-    else:
-        print "N: ", n
-        sign = s%n
+        if tryChallenge(r, primes, signs)  :
+            break    
 
-        print "\n", sign
-        r.writeline(str(sign))
-        print r.readall()
-        break
+
